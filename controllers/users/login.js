@@ -40,7 +40,7 @@ const login = async (req, res, next) => {
     res.status(200).json({
       accessToken: accessToken,
       refreshToken: refreshToken,
-      user: { email: user.email },
+      user: { email: user.email, balance: user.balance },
     });
   } catch (error) {
     next(error);

@@ -1,5 +1,5 @@
 const { Users } = require("../../models/modelUser");
-const { BadRequest, Unauthorized } = require("http-errors");
+const { BadRequest } = require("http-errors");
 
 const updateBalance = async (req, res, next) => {
   try {
@@ -12,23 +12,18 @@ const updateBalance = async (req, res, next) => {
         { balance },
         { new: true }
       );
-      if (!updateUser) {
-        return Unauthorized();
-      }
-  
+
       res.json({
         status: "success",
-        code: 200,
+        code: 201,
         user: {
           email: updateUser.email,
           balance: updateUser.balance,
         },
       });
-    } else{ 
+    } else {
       return next(BadRequest("Wrong input or missing required field"));
     }
-
-    
   } catch (error) {
     next(error);
   }
