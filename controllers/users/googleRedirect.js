@@ -4,10 +4,14 @@ const { Users } = require("../../models/modelUser");
 const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
 const bcrypt = require("bcrypt");
-const { JWT_CODE } = process.env;
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL, FRONTEND_URL } =
-  process.env;
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  BASE_URL,
+  FRONTEND_URL,
+  JWT_CODE,
+} = process.env;
 
 async function googleRedirect(req, res, next) {
   try {
@@ -21,7 +25,7 @@ async function googleRedirect(req, res, next) {
       data: {
         client_id: GOOGLE_CLIENT_ID,
         client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${BASE_URL}/auth/google-redirect`,
+        redirect_uri: `${BASE_URL}/users/google-redirect`,
         grant_type: "authorization_code",
         code,
       },
@@ -34,10 +38,9 @@ async function googleRedirect(req, res, next) {
       },
     });
 
-    const { email } = userData.data.email;
-    const { balance } = userData.data.balance;
+    const { email } = userData.data;
 
-    const user = await Users.findOne({ email });
+    let user = await Users.findOne({ email });
 
     if (!user) {
       const createdPassword = nanoid();
@@ -45,7 +48,7 @@ async function googleRedirect(req, res, next) {
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(createdPassword, salt);
 
-      await Users.create({
+      user = await Users.create({
         email,
         password: hashedPassword,
         balance: null,
@@ -53,22 +56,16 @@ async function googleRedirect(req, res, next) {
         verificationToken: null,
       });
     }
-    const storedUser = await Users.findOne({ email });
     const accessToken = jwt.sign({ id: user.id }, JWT_CODE, {
       expiresIn: "1d",
     });
-    const refreshToken = jwt.sign({ id: user.id }, JWT_CODE, {
-      expiresIn: "30d",
-    });
+
     await Users.findByIdAndUpdate(
-      storedUser._id,
-      { accessToken, refreshToken },
+      { _id: user._id },
+      { accessToken: accessToken },
       { new: true }
     );
-
-    return res.redirect(
-      `${FRONTEND_URL}?email=${email}&refreshToken=${refreshToken}&balance=${balance}`
-    );
+    return res.redirect(`${FRONTEND_URL}?accessToken=${accessToken}`);
   } catch (error) {
     next(error);
   }
