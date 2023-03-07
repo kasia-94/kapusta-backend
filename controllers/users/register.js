@@ -27,9 +27,9 @@ async function register(req, res, next) {
     });
 
     const mail = {
-      to: email,
+      to: savedUser.email,
       subject: "Confirm email",
-      html: `<a target="_blanc" href='${BASE_URL}/users/verify/${verificationToken}'><b>Welcome to Kapu$ta!</b> <br> You have just registered! Please, confirm your email if you want to use Kapu$ta</a>`,
+      html: `<a target="_blanc" href='${BASE_URL}/users/verify/${savedUser.verificationToken}'><b>Welcome to Kapu$ta!</b> <br> You have just registered! Please, confirm your email if you want to use Kapu$ta</a>`,
     };
     await srvc.sendEmail(mail);
 
