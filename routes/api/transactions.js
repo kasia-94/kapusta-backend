@@ -10,10 +10,6 @@ const {
 } = require("../../controllers/transactions/getTransactions");
 const { tryCatchWrapper } = require("../../helpers/index");
 // const { validateBody } = require("../../middlewares/validateBody");
-const {
-  addTransactionsExpensesSchema,
-  addTransactionsIncomesSchema,
-} = require("../../schema/Joi/transactionsSchema");
 
 const {
   expensesByMonthYear,
